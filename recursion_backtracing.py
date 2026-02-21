@@ -9,7 +9,7 @@ def solve_maze(maze):
     path = []
 
     def backtrack(x, y):
-        # Base case: If destination is reached
+        # Base case: If destination is reachsed
         if x == n - 1 and y == n - 1:
             path.append((x, y))
             return True
