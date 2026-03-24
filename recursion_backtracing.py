@@ -57,4 +57,3 @@ maze = [
 result = solve_maze(maze)
 print(result)
 #### slotion 2
-def rIAm
