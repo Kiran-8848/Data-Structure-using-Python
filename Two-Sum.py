@@ -7,3 +7,24 @@ class Solution:
                     return [i,j]
 sol=Solution()
 print(sol.twoSum([2,7,11,15],9))
+
+
+
+#
+# class Solution:
+#     def twoSum(self, nums: List[int], target: int) -> List[int]:
+#         left=0
+#         n=len(nums)
+#         right=n-1
+#         nums.sort()
+#         sum=nums[left]+nums[right]
+#         while left<right:
+#             sum= nums[left]+nums[right]
+#             if sum==target:
+#                 return left,right
+#             elif (sum <target):
+#                 left+=1
+#             else:
+#                 right-=1
+
+
