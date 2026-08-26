@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battlefield Ping Pong</title>
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace; /* Military style font */
+        }
+        
+        canvas {
+            /* 1. This creates a gritty, muddy green/brown gradient */
+            background: radial-gradient(circle, #4b5320 0%, #2f3315 60%, #111111 100%);
+            
+            /* 2. TO USE A REAL IMAGE: Delete the background above, and remove the /* from the line below. 
+                  Make sure your image is in the same folder and named battlefield.jpg! */
+            /* background-image: url('battlefield.jpg'); */
+            
+            background-size: cover;
+            background-position: center;
+            border: 4px solid #333;
+            box-shadow: 0 4px 20px rgba(255, 50, 50, 0.2);
+            
+            /* Changes mouse to a sniper crosshair! */
+            cursor: crosshair; 
+        }
+    </style>
+</head>
+<body>
+
+    <h2>BATTLEFIELD: PONG</h2>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Game Objects - Themed for a battlefield
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 8,
+            speed: 5,
+            dx: 6,
+            dy: 6,
+            color: "#ff3333" // Red glowing tracer round
+        };
+
+        const paddleWidth = 12;
+        const paddleHeight = 100;
+
+        const player = {
+            x: 0,
+            y: canvas.height / 2 - paddleHeight / 2,
+            width: paddleWidth,
+            height: paddleHeight,
+            color: "#556b2f", // Army Green
+            score: 0
+        };
+
+        const computer = {
+            x: canvas.width - paddleWidth,
+            y: canvas.height / 2 - paddleHeight / 2,
+            width: paddleWidth,
+            height: paddleHeight,
+            color: "#556b2f", // Army Green
+            score: 0
+        };
+
+        // Player Controls
+        canvas.addEventListener("mousemove", (evt) => {
+            let rect = canvas.getBoundingClientRect();
+            player.y = evt.clientY - rect.top - player.height / 2;
+        });
+
+        // Drawing Functions
+        function drawRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, w, h);
+        }
+
+        function drawCircle(x, y, r, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2, false);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawText(text, x, y, color) {
+            ctx.fillStyle = color;
+            ctx.font = "45px 'Courier New'"; // Matching military font
+            ctx.fillText(text, x, y);
+        }
+
+        function drawNet() {
+            for (let i = 0; i <= canvas.height; i += 30) {
+                // Drawing a darker, thicker line to look like a barricade or trench
+                drawRect(canvas.width / 2 - 2, i, 4, 15, "rgba(0, 0, 0, 0.5)");
+            }
+        }
+
+        function resetBall() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.dx = -ball.dx; 
+            ball.speed = 5;
+        }
+
+        // Game Logic
+        function update() {
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            // Simple Computer AI
+            let computerLevel = 0.08; 
+            computer.y += (ball.y - (computer.y + computer.height / 2)) * computerLevel;
+
+            // Top and bottom wall collision
+            if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+                ball.dy = -ball.dy;
+            }
+
+            let activePaddle = (ball.x < canvas.width / 2) ? player : computer;
+
+            // Paddle collision
+            if (ball.x - ball.radius < activePaddle.x + activePaddle.width &&
+                ball.x + ball.radius > activePaddle.x &&
+                ball.y + ball.radius > activePaddle.y &&
+                ball.y - ball.radius < activePaddle.y + activePaddle.height) {
+                
+                ball.dx = -ball.dx;
+                ball.dx += (ball.dx > 0 ? 0.5 : -0.5);
+                ball.dy += (ball.dy > 0 ? 0.5 : -0.5);
+            }
+
+            // Score update
+            if (ball.x - ball.radius < 0) {
+                computer.score++;
+                resetBall();
+            } else if (ball.x + ball.radius > canvas.width) {
+                player.score++;
+                resetBall();
+            }
+        }
+
+        function draw() {
+            // CLEAR THE CANVAS INSTEAD OF PAINTING IT BLACK!
+            // This allows our CSS battlefield background to show through.
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw net & scores
+            drawNet();
+            drawText(player.score, canvas.width / 4, canvas.height / 5, "rgba(255, 255, 255, 0.6)");
+            drawText(computer.score, 3 * canvas.width / 4, canvas.height / 5, "rgba(255, 255, 255, 0.6)");
+
+            // Draw paddles & ball
+            drawRect(player.x, player.y, player.width, player.height, player.color);
+            drawRect(computer.x, computer.y, computer.width, computer.height, computer.color);
+            drawCircle(ball.x, ball.y, ball.radius, ball.color);
+        }
+
+        // Main Game Loop
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop); 
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
